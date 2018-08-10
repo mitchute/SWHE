@@ -1,8 +1,7 @@
-import sys
-from math import exp
-
 import numpy as np
+import sys
 from CoolProp.CoolProp import PropsSI
+from math import exp
 from scipy.optimize import minimize
 
 # damn those pesky global constants
@@ -15,7 +14,8 @@ tol = 0.001
 
 class SWHE():
 
-    def __init__(self, d_i, d_o, d_coil, dx, dy, pipe_material, fluid, concentration=0.0, foul_in=False, foul_out=False):
+    def __init__(self, d_i, d_o, d_coil, dx, dy, pipe_material, fluid, concentration=0.0, foul_in=False,
+                 foul_out=False):
 
         self.d_i = d_i
         self.d_o = d_o
@@ -36,8 +36,8 @@ class SWHE():
              'SpHt': PropsSI('C', 'T', temp + 273.15, 'P', 101325, 'Water'),
              'Beta': PropsSI('ISOBARIC_EXPANSION_COEFFICIENT', 'T', temp + 273.15, 'P', 101325, 'Water')}
 
-        d['KVisc'] = d['Visc']/d['Dens']
-        d['Diff'] = d['Cond']/(d['Dens'] * d['SpHt'])
+        d['KVisc'] = d['Visc'] / d['Dens']
+        d['Diff'] = d['Cond'] / (d['Dens'] * d['SpHt'])
 
         return d
 
@@ -63,10 +63,10 @@ class SWHE():
 
         # store data for reporting
         self.out_dict = {
-                    'Temp, inlet': t_i,
-                    'Temp, surf water': t_sw,
-                    'Vol Flow Rate': v_dot,
-                    'Length': l}
+            'Temp, inlet': t_i,
+            'Temp, surf water': t_sw,
+            'Vol Flow Rate': v_dot,
+            'Length': l}
 
         # initialize temperatures
         t_o = np.mean([t_i, t_sw])
@@ -76,7 +76,7 @@ class SWHE():
         t_o_old = 0
 
         # initialize geometries
-        area_cr = np.pi * self.d_i**2 / 4.0
+        area_cr = np.pi * self.d_i ** 2 / 4.0
         area_so = np.pi * self.d_i * l
         area_si = np.pi * self.d_o * l
 
@@ -155,7 +155,7 @@ class SWHE():
 
             self.out_dict['Pipe Cond'] = k_pipe
 
-            r_pipe = np.log(self.d_o/self.d_i) / (2 * np.pi * k_pipe * l)
+            r_pipe = np.log(self.d_o / self.d_i) / (2 * np.pi * k_pipe * l)
 
             self.out_dict['Resist, pipe'] = r_pipe
 
@@ -163,10 +163,10 @@ class SWHE():
             q_flux = q_coil / area_so
             self.out_dict['Q, flux'] = q_flux
 
-            ra_d_mod = gravity * abs(beta_w * q_flux) * self.d_o**4 / (k_w * nu_w * alpha_w)
+            ra_d_mod = gravity * abs(beta_w * q_flux) * self.d_o ** 4 / (k_w * nu_w * alpha_w)
             self.out_dict['Rayleigh'] = ra_d_mod
 
-            nusselt_o = a + b * ra_d_mod**c * (self.dy / self.d_o)**d * (self.dx / self.d_o)**e
+            nusselt_o = a + b * ra_d_mod ** c * (self.dy / self.d_o) ** d * (self.dx / self.d_o) ** e
             self.out_dict['Nusselt, out'] = nusselt_o
 
             h_o = nusselt_o * k_w / self.d_o
@@ -182,7 +182,7 @@ class SWHE():
             re = vel * self.d_i / nu_f
             self.out_dict['Reynolds'] = re
 
-            nusselt_i = 0.023 * re**0.85 * pr_f**0.4 * (self.d_i / self.d_coil)**0.1
+            nusselt_i = 0.023 * re ** 0.85 * pr_f ** 0.4 * (self.d_i / self.d_coil) ** 0.1
             self.out_dict['Nusselt, in'] = nusselt_i
 
             h_i = nusselt_i * k_f / self.d_i
@@ -196,14 +196,14 @@ class SWHE():
             self.out_dict['Resist, tot'] = r_tot
 
             # overall heat transfer coefficient
-            ua = 1/r_tot
+            ua = 1 / r_tot
             self.out_dict['UA'] = ua
 
             # effectivness-NTU method
             m_dot = v_dot * rho_f
             self.out_dict['Mass flow rate'] = m_dot
 
-            ntu = ua/(m_dot * cp_f)
+            ntu = ua / (m_dot * cp_f)
             self.out_dict['NTU'] = ntu
 
             eff = 1 - exp(-ntu)
@@ -245,14 +245,12 @@ class SWHE():
         t_appr = 0
 
         while abs(q_coil - q_req) > tol and abs(t_appr - t_appr_req) > tol:
-
             # set inlet temp to hit approach temperature
             minimize(self.find_t_in, x0=np.array([30]), args=(t_sw, v_dot, 15, 5))
             # set length to hit load
 
 
 if __name__ == '__main__':
-
     H = SWHE(d_i=0.025273,
              d_o=0.028575,
              d_coil=1.8288,
