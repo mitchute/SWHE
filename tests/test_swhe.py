@@ -37,6 +37,17 @@ class TestSWHE(unittest.TestCase):
         self.assertAlmostEqual(self.swhe.calc_outside_conv_resistance(1000, 20, 25), 1.1559e-3, delta=1e-5)
         self.assertAlmostEqual(self.swhe.calc_outside_conv_resistance(1000, 20, 15), 8.619e-4, delta=1e-6)
 
+    def test_calc_inside_fouling_resistance(self):
+        self.assertEqual(self.swhe.calc_inside_fouling_resistance(False), 0.0)
+        self.assertAlmostEqual(self.swhe.calc_inside_fouling_resistance(True), 2.586e-5, delta=1e-8)
+
+    def test_calc_outside_fouling_resistance(self):
+        self.assertEqual(self.swhe.calc_outside_fouling_resistance(False), 0.0)
+        self.assertAlmostEqual(self.swhe.calc_outside_fouling_resistance(True), 6.325e-5, delta=1e-8)
+
     def test_simulate(self):
         outlet_temp = self.swhe.simulate(1, 20, 15)
         self.assertAlmostEqual(outlet_temp, 19.50, delta=0.01)
+
+        outlet_temp = self.swhe.simulate(1, 10, 15)
+        self.assertAlmostEqual(outlet_temp, 10.40, delta=0.01)
