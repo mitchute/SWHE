@@ -16,6 +16,20 @@ class Pipe(object):
         self.density = data["density"]
         self.conductivity = data["conductivity"]
 
+        self.area_cr_inner = None
+        self.area_cr_outer = None
+        self.area_surf_inner = None
+        self.area_surf_outer = None
+        self.resist_cond = None
+        self.update_pipe()
+
+    def update_pipe(self):
+        self.area_cr_inner = self.calc_inner_cross_sectional_area()
+        self.area_cr_outer = self.calc_outer_cross_sectional_area()
+        self.area_surf_inner = self.calc_inner_surface_area()
+        self.area_surf_outer = self.calc_outer_surface_area()
+        self.resist_cond = self.calc_cond_resistance()
+
     def calc_inner_cross_sectional_area(self):
         """
         Calculate the pipe inner cross-sectional area
