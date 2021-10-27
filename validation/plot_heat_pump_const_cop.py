@@ -31,7 +31,7 @@ def plot():
     ax.set_ylabel(r"$T_{out,src}$ [C]")
     ax.legend()
     ax.grid()
-    f_name = Path(__file__).parent / "heat_pump_const_cop.png"
+    f_name = Path(__file__).parent / "_heat_pump_const_cop.png"
     plt.savefig(f_name, bbox_inches="tight")
 
 

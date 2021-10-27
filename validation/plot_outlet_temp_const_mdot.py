@@ -40,7 +40,7 @@ def plot():
     ax.set_ylabel(r"$T$ [C]")
     ax.legend()
     ax.grid()
-    f_name = Path(__file__).parent / "outlet_temp_const_mdot.png"
+    f_name = Path(__file__).parent / "_outlet_temp_const_mdot.png"
     plt.savefig(f_name, bbox_inches="tight")
 
 

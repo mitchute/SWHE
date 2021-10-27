@@ -35,7 +35,7 @@ def plot():
     ax.set_ylabel(r"$R_{conv}$ [K/W]")
     ax.grid()
     plt.title("Inside Convection Resistance")
-    f_name = Path(__file__).parent / "inside_conv_resistance.png"
+    f_name = Path(__file__).parent / "_inside_conv_resistance.png"
     plt.savefig(f_name, bbox_inches="tight")
 
 

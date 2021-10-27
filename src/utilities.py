@@ -27,10 +27,12 @@ def smoothing_function(x: float, x_min: float, x_max: float, y_min: float, y_max
     # y_sig = 1 / (1 + exp(-x_sig))
 
     # tuned parameters
+    # Parameters tuned ensure the normalized sigmoid satisfies (x, y) = (-4, 0) and (4, 1)
+    # when x = -4 and 4, the derivative of the sigmoid function is < 0.01.
+    # This ensures that the sigmoid transition at those points is very nearly flat, but begins to
+    # smoothly transition immediately.
     a = 1.0373140383507
-    b = 0.0
-    c = 1.0
-    d = 0.0186560820737
-    y_sig = a / (1 + exp(-(x_sig - b)) / c) - d
+    b = 0.0186560820737
+    y_sig = a / (1 + exp(-x_sig)) - b
 
     return (y_max - y_min) * y_sig + y_min
