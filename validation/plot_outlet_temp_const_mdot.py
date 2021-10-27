@@ -26,13 +26,17 @@ def plot():
     swhe = SWHE(data)
 
     x = np.arange(1, 40, 0.1)
-    y = [swhe.simulate(0.5, m, 20) for m in x]
+    y_010 = [swhe.simulate(0.10, m, 20) for m in x]
+    y_050 = [swhe.simulate(0.50, m, 20) for m in x]
+    y_100 = [swhe.simulate(1.00, m, 20) for m in x]
 
     fig, ax = plt.subplots()
     ax.plot(x, x, label=r"$T_{in}$")
-    ax.plot(x, y, label=r"$T_{out}$")
+    ax.plot(x, y_010, label=r"$T_{out}$ $\dot{m}=0.10$ kg/s")
+    ax.plot(x, y_050, label=r"$T_{out}$ $\dot{m}=0.50$ kg/s", linestyle="--")
+    ax.plot(x, y_100, label=r"$T_{out}$ $\dot{m}=1.00$ kg/s", linestyle=":")
     ax.plot([1, 40], [20, 20], label=r"$T_{sw}$")
-    ax.set_xlabel(r"$\dot{m}$ [kg/s]")
+    ax.set_xlabel(r"$T$ [C]")
     ax.set_ylabel(r"$T$ [C]")
     ax.legend()
     ax.grid()
