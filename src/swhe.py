@@ -3,6 +3,7 @@ from typing import Union
 
 from src.fluid import Fluid
 from src.pipe import Pipe
+from src.utilities import smoothing_function
 
 
 class SWHE(object):
@@ -40,23 +41,63 @@ class SWHE(object):
 
         return self.calc_v_dot(m_dot, temperature) / self.pipe.area_cr_inner
 
+    @staticmethod
+    def calc_laminar_nusselt_inside():
+        """
+        Compute laminar Nusselt number for average of uniform heat flux
+        and uniform wall temperature boundary conditions.
+        :return: laminar Nusselt no. [-]
+        """
+
+        return 4.0
+
+    def calc_turbulent_nusselt_inside(self, reynolds, temperature):
+        """
+        Compute turbulent Nusselt number using Rogers and Mayhew 1964.
+        :param reynolds: Reynolds no., [-]
+        :param temperature: temperature, [C]
+        :return: turbulent Nusselt no. [-]
+        """
+
+        prandtl = self.brine.prandtl(temperature)
+        return 0.023 * (reynolds ** 0.85) * (prandtl ** 0.4) * (self.pipe.inner_dia / self.coil_dia) ** 0.1
+
+    def calc_reynolds_no(self, m_dot: Union[int, float], temperature: Union[int, float]):
+        """
+        Compute Reynolds number
+        :param m_dot: mass flow rate, [kg/s]
+        :param temperature: temperature, [C]
+        :return: Reynolds no. [-]
+        """
+
+        density = self.brine.density(temperature)
+        dyn_visc = self.brine.viscosity(temperature)
+        velocity = self.calc_fluid_velocity(m_dot, temperature)
+        return velocity * self.pipe.inner_dia * density / dyn_visc
+
     def calc_inside_conv_resistance(self, m_dot: Union[int, float], temperature: Union[int, float]):
         """
         Compute inside convection resistance
         :param m_dot: mass flow rate, [kg/s]
         :param temperature: temperature of fluid, [C]
-        :return: resistance, [K/W]
+        :return: inside convection resistance, [K/W]
         """
 
         # compute reynolds no
-        density = self.brine.density(temperature)
-        dyn_visc = self.brine.viscosity(temperature)
-        velocity = self.calc_fluid_velocity(m_dot, temperature)
-        reynolds = velocity * self.pipe.inner_dia * density / dyn_visc
+        reynolds = self.calc_reynolds_no(m_dot, temperature)
 
         # compute nusselt number
-        prandtl = self.brine.prandtl(temperature)
-        nusselt = 0.023 * (reynolds ** 0.5) * (prandtl ** 0.4) * (self.pipe.inner_dia / self.coil_dia) ** 0.1
+        reynolds_low_cutoff = 500
+        reynolds_high_cutoff = 5000
+        if reynolds < reynolds_low_cutoff:
+            nusselt = self.calc_laminar_nusselt_inside()
+        elif reynolds_low_cutoff <= reynolds < reynolds_high_cutoff:
+            x = smoothing_function(reynolds, reynolds_low_cutoff, reynolds_high_cutoff, 0, 1)
+            nusselt_lam = self.calc_laminar_nusselt_inside()
+            nusselt_turb = self.calc_turbulent_nusselt_inside(reynolds, temperature)
+            nusselt = nusselt_lam * (1 - x) + nusselt_turb * x
+        else:
+            nusselt = self.calc_turbulent_nusselt_inside(reynolds, temperature)
 
         # compute resistance
         cond = self.brine.conductivity(temperature)
@@ -66,6 +107,14 @@ class SWHE(object):
     def calc_outside_conv_resistance(self, q_coil: Union[int, float],
                                      temperature: Union[int, float],
                                      temperature_sw: Union[int, float]):
+        """
+        Computer outside tube resistance
+        :param q_coil: coil heat transfer rate, [W]
+        :param temperature: brine temperature, [C]
+        :param temperature_sw: surface water temperature, [C]
+        :return: outside convection resistance, [K/W]
+        """
+
         gravity = 9.81
 
         # coil heat flux
@@ -98,12 +147,24 @@ class SWHE(object):
         return 1 / (h_o * cond * self.pipe.area_surf_outer)
 
     def calc_inside_fouling_resistance(self, include_fouling=False):
+        """
+        Compute inside fouling resistance
+        :param include_fouling: include fouling flag
+        :return: inside fouling resistance, [K/W]
+        """
+
         if include_fouling:
             return 0.000175 / self.pipe.area_surf_inner
         else:
             return 0.0
 
     def calc_outside_fouling_resistance(self, include_fouling=False):
+        """
+        Compute outside fouling resistance
+        :param include_fouling: include fouling flag
+        :return: outside fouling resistance, [K/W]
+        """
+
         if include_fouling:
             return 0.00053 / self.pipe.area_surf_outer
         else:

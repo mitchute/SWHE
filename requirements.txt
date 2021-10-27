@@ -1,5 +1,7 @@
 # library dependencies
 CoolProp==6.4.1
+numpy
+matplotlib
 
 # testing dependencies
 coveralls==2.2.0

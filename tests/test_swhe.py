@@ -30,8 +30,11 @@ class TestSWHE(unittest.TestCase):
     def test_calc_fluid_velocity(self):
         self.assertAlmostEqual(self.swhe.calc_fluid_velocity(1, 20), 2.704, delta=1e-3)
 
-    def test_calc_conv_resistance(self):
-        self.assertAlmostEqual(self.swhe.calc_inside_conv_resistance(1, 20), 8.0449e-4, delta=1e-8)
+    def test_calc_inside_conv_resistance(self):
+        self.assertAlmostEqual(self.swhe.calc_inside_conv_resistance(0.01, 20), 1.616e-3, delta=1e-6)
+        self.assertAlmostEqual(self.swhe.calc_inside_conv_resistance(0.1, 20), 2.535e-4, delta=1e-7)
+        self.assertAlmostEqual(self.swhe.calc_inside_conv_resistance(0.14, 20), 1.254e-4, delta=1e-7)
+        self.assertAlmostEqual(self.swhe.calc_inside_conv_resistance(1, 20), 2.203e-5, delta=1e-8)
 
     def test_calc_outside_conv_resistance(self):
         self.assertAlmostEqual(self.swhe.calc_outside_conv_resistance(1000, 20, 25), 1.1559e-3, delta=1e-5)
@@ -47,7 +50,7 @@ class TestSWHE(unittest.TestCase):
 
     def test_simulate(self):
         outlet_temp = self.swhe.simulate(1, 20, 15)
-        self.assertAlmostEqual(outlet_temp, 19.50, delta=0.01)
+        self.assertAlmostEqual(outlet_temp, 19.26, delta=0.01)
 
         outlet_temp = self.swhe.simulate(1, 10, 15)
-        self.assertAlmostEqual(outlet_temp, 10.40, delta=0.01)
+        self.assertAlmostEqual(outlet_temp, 10.55, delta=0.01)
