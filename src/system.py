@@ -10,6 +10,14 @@ class System(object):
         self.swhe = SWHE({**data["swhe"], "fluid": data["fluid"]})
 
     def simulate(self, q_zone: Union[int, float], m_dot: Union[int, float], temperature_sw: Union[int, float]):
+        """
+        Simulate system containing a heat pump and surface water heat exchanger
+        :param q_zone: zone load, [W]
+        :param m_dot: mass flow rate through swhe, [kg/s]
+        :param temperature_sw:
+        :return:
+        """
+
         t_appr = 0
         t_appr_old = 5
         t_out_swhe = temperature_sw

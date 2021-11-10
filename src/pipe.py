@@ -23,7 +23,14 @@ class Pipe(object):
         self.resist_cond = None
         self.update_pipe()
 
-    def update_pipe(self):
+    def update_pipe(self, pipe_length=None):
+        """
+        Update pipe geometry
+        :param pipe_length: pipe length (optional), [m]
+        :return: none
+        """
+        if pipe_length is not None:
+            self.length = pipe_length
         self.area_cr_inner = self.calc_inner_cross_sectional_area()
         self.area_cr_outer = self.calc_outer_cross_sectional_area()
         self.area_surf_inner = self.calc_inner_surface_area()
